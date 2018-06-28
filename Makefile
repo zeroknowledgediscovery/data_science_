@@ -10,7 +10,7 @@ DEPS =
 
 INCLUDES = -I$(ZBASE)
 
-OBJ =  cnfbd 
+OBJ =  corr cnfbd 
 
 all:	 $(OBJ)  clear mvbin
 
@@ -23,6 +23,13 @@ config.o: config.cc $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS); ar rcs libconfigfile.a config.o; rm config.o; mv libconfigfile.a ./lib
 
 # compile binaries --------------------------------
+
+corr.o: corr.cc
+	$(CC) $(INCLUDES) -c -o $@ $< $(CFLAGS)
+
+corr: corr.o
+	$(CC)  $(CFLAGS) -o $@ $^  $(LIBSO) $(LIBS) 
+#-Bdynamic -lgsl 
 
 
 cnfbd.o: cnfbd.cc
