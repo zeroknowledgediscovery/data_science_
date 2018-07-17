@@ -1,16 +1,20 @@
-CC = g++ 
-CFLAGS = -std=c++11 -g -Wall -Wextra -Wunused -fopenmp -Wl,--as-needed
+CC = g++ -std=c++11
 
-ZBASE=./zbase# 
+CFLAGS = -O3 -Wall -Wextra -Wunused -fopenmp -Wl,--as-needed
+CFLAGS =  -static -O3 -Wall -Wextra -Wunused -fopenmp -Wl,--as-needed
+
+ZBASE=./#
 LIBSO=  -lgomp  -lm 
+LIBS=   -lboost_system -lboost_thread -lboost_program_options -lboost_timer  -lboost_chrono -Bdynamic -lgsl -lgslcblas
+
+LIBSO=  -static-libstdc++ -static-libgcc -lgomp  -lm 
 LIBS=   -lboost_system -lboost_thread -lboost_program_options -lboost_timer  -lboost_chrono -Bdynamic -lgsl -lgslcblas
 LIBPATH= $(ZBASE)/lib
 
 DEPS = 
-
 INCLUDES = -I$(ZBASE)
 
-OBJ =  corr cnfbd 
+OBJ =  procscript corr cnfbd 
 
 all:	 $(OBJ)  clear mvbin
 
@@ -22,29 +26,25 @@ semantic.o: semantic.cc $(DEPS)
 config.o: config.cc $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS); ar rcs libconfigfile.a config.o; rm config.o; mv libconfigfile.a ./lib
 
+procx.o: procx.cc 
+	$(CC) -c -o $@ $< $(CFLAGS); ar rcs libdictx_.a procx.o; rm procx.o; mv libdictx_.a ./lib
+
 # compile binaries --------------------------------
 
-corr.o: corr.cc
-	$(CC) $(INCLUDES) -c -o $@ $< $(CFLAGS)
+%.o :	%.cc
+	$(CC) $(INCLUDES)  -c -o $@ $< $(CFLAGS)
+
+procscript:	procscript.o
+	$(CC)  $(CFLAGS) -o $@ $^   -L$(LIBPATH)  -ldictx_  $(LIBSO)  $(LIBS)  
 
 corr: corr.o
-	$(CC)  $(CFLAGS) -o $@ $^  $(LIBSO) $(LIBS) 
+	$(CC)  $(CFLAGS) -o $@ $^   -L$(LIBPATH) $(LIBSO) $(LIBS) 
 #-Bdynamic -lgsl 
 
-
-cnfbd.o: cnfbd.cc
-	$(CC) $(INCLUDES) -c -o $@ $< $(CFLAGS)
 
 cnfbd: cnfbd.o
-	$(CC)  $(CFLAGS) -o $@ $^  $(LIBSO) $(LIBS) 
+	$(CC)  $(CFLAGS) -o $@ $^  -L$(LIBPATH)  $(LIBSO) $(LIBS) 
 #-Bdynamic -lgsl 
-
-
-Quantizer.o: Quantizer.cpp
-	$(CC) $(INCLUDES) -c -o $@ $< $(CFLAGS)
-
-Quantizer: Quantizer.o
-	$(CC)  $(CFLAGS) -o $@ $^ -lsemcrct -lconfigfile -L$(LIBPATH) $(LIBSO) $(LIBS)    
 
 
 # utility commands --------------------------------
