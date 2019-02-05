@@ -28,7 +28,7 @@ if total > 2:
 if total > 3:
     OUTFILE = sys.argv[3]
 
-
+AUC='AUC'
 
 
 cmap = plt.get_cmap(CMAP)
@@ -42,7 +42,7 @@ cmapS = cm.ScalarMappable(norm=norm, cmap=cmap)
 
 df=pd.read_csv(DATAFILE)
 df.FIPS=[str(int(i)).zfill(5) for i in df.FIPS]
-fipsdict={fips:auc for fips,auc in zip(df.FIPS.values,df.AUC.values)}
+fipsdict={fips:auc for fips,auc in zip(df.FIPS.values,df[AUC].values)}
 
 fig=plt.figure(figsize=(20,15))
 ax = plt.axes([0, 0, 1, 1],
