@@ -14,7 +14,7 @@ LIBPATH= $(ZBASE)/lib
 DEPS = 
 INCLUDES = -I$(ZBASE)
 
-OBJ =  procscript corr cnfbd 
+OBJ =  procscript extract_age_group corr cnfbd 
 
 all:	 $(OBJ)  clear mvbin
 
@@ -33,6 +33,9 @@ procx.o: procx.cc
 
 %.o :	%.cc
 	$(CC) $(INCLUDES)  -c -o $@ $< $(CFLAGS)
+
+extract_age_group:	extract_age_group.o
+	$(CC)  $(CFLAGS) -o $@ $^   -L$(LIBPATH)  -ldictx_  $(LIBSO)  $(LIBS)  
 
 procscript:	procscript.o
 	$(CC)  $(CFLAGS) -o $@ $^   -L$(LIBPATH)  -ldictx_  $(LIBSO)  $(LIBS)  

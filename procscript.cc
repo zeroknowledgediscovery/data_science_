@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
     ("truncate,T",value<vector<unsigned int> >()->multitoken(), "truncate at first occurrence []")
     ("exclude,X",value<vector<unsigned int> >()->multitoken(), "exclude any occurrence []")
     ("necess,N",value<vector<unsigned int> >()->multitoken(), "must occur []")
-    ("L,L",value<string>(&idlog), "patient id logs [id.log]")
+    ("log,L",value<string>(&idlog), "patient id logs [id.log]")
     ("timer,t",value<bool>(), "show timer [true]");
   
   options_description desc( "\n\n\
