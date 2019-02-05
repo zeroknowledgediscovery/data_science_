@@ -466,7 +466,7 @@ void _phenotype_::set_filelines(int LN__)
   _FSZ_=LN__;
 };
 //---------------------------------
-void _phenotype_::write_log(string directory)
+void _phenotype_::write_log(string directory,string ofile)
 {
   int count=0;
   cout << "writing files.." << endl;
@@ -486,7 +486,7 @@ void _phenotype_::write_log(string directory)
     }
   cout << endl;
 
-  ofstream OUT_("id.log");
+  ofstream OUT_(ofile.c_str());
     for(map<string,vector<string> >::iterator itr
 	  =LOGid_.begin();
       itr!=LOGid_.end();

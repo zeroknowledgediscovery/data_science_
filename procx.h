@@ -158,7 +158,7 @@ public:
   
   void clear_setup();
 
-  void write_log(string directory="./");
+  void write_log(string directory="./",string ofile="id.log");
   void print_setup();
 
   void set_pref(bool);

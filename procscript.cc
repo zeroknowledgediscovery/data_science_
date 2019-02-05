@@ -28,7 +28,8 @@ int main(int argc, char* argv[])
   set <unsigned int> TRNCT_, EXCLD_,NECESS_;
   vector <unsigned int> vTRNCT_, vEXCLD_,vNECESS_;
   bool zeropref=true;
-
+  string idlog="id.log";
+  
   options_description infor( "Program information");
   infor.add_options()
     ("help,h", "print help message.")
@@ -51,6 +52,7 @@ int main(int argc, char* argv[])
     ("truncate,T",value<vector<unsigned int> >()->multitoken(), "truncate at first occurrence []")
     ("exclude,X",value<vector<unsigned int> >()->multitoken(), "exclude any occurrence []")
     ("necess,N",value<vector<unsigned int> >()->multitoken(), "must occur []")
+    ("L,L",value<string>(&idlog), "patient id logs [id.log]")
     ("timer,t",value<bool>(), "show timer [true]");
   
   options_description desc( "\n\n\
@@ -177,7 +179,7 @@ int main(int argc, char* argv[])
     UTIL__::print_status(PHN<<subject);
   cout << endl;
   
-  PHN.write_log(resultdirectory);
+  PHN.write_log(resultdirectory,idlog);
   IN.close();
 
   return 0;
