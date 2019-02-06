@@ -22,6 +22,16 @@ const char HSEP='|';
 const string VERSION="DX_slice v1.0 \n Copyright Ishanu Chattopadhyay 2019";
 const string EMPTY_ARG_MESSAGE="Exiting. Type -h or --help for usage";
 
+
+bool invalidChar (char c) 
+{  
+  return !( (unsigned int)c >32);   
+} 
+void stripUnicode(string & str) 
+{ 
+    str.erase(remove_if(str.begin(),str.end(), invalidChar), str.end());  
+}
+
 int main(int argc, char* argv[])
 {
   string DBfile="",ofile="out.dat";
@@ -103,11 +113,23 @@ int main(int argc, char* argv[])
   int NUM=UTIL__::FileSizeLines(IN);
 
 
-  string line;
+  string line,line_="";
   int countl=0;
   while(getline(IN,line))
     {
-      stringstream ss(line);
+      UTIL__::print_status(++countl/(0.0+NUM));
+      stripUnicode(line);
+      char c = line.back();
+      if ((int)c == 92)
+	{
+	  line_+=line;
+	  continue;
+	}
+      else
+	{
+	  line_+=line;
+	}
+      stringstream ss(line_);
       string hdr;
       if(getline(ss,hdr,HDRSEP))
 	{
@@ -120,7 +142,7 @@ int main(int argc, char* argv[])
 		{
 		  int age=atoi(tok.c_str());
 		  if ((age<=AGEMAX) && (age>=AGEMIN))
-			out << line << endl;
+			out << line_ << endl;
 		  break;
 		}
 	      else
@@ -128,7 +150,7 @@ int main(int argc, char* argv[])
 	      count++;
 	    }
 	}
-      UTIL__::print_status(++countl/(0.0+NUM));
+      line_="";
     }
 
   return 0;

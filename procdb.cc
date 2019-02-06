@@ -6,12 +6,17 @@
 #include <exception>
 #include <boost/timer/timer.hpp>
 #include <sys/resource.h>
+#include <boost/filesystem.hpp>
+
 #include "procx.h"
 
 using namespace boost::program_options;
 
-const string VERSION="DX_gen v1.0 \n Copyright Ishanu Chattopadhyay 2015";
+const string VERSION="DBPROC_gen v0.9314 \n Copyright Ishanu Chattopadhyay 2019";
 const string EMPTY_ARG_MESSAGE="Exiting. Type -h or --help for usage";
+const string USAGE="-P phnfile  -D DXfile -w DATA_SEQ_DIR   -a 5 -T 1 -F ALLFIPS.dat -z 1";
+
+  
 bool TIMER=false;
 
 //---------------------------------
@@ -28,8 +33,8 @@ int main(int argc, char* argv[])
   set <unsigned int> TRNCT_, EXCLD_,NECESS_;
   vector <unsigned int> vTRNCT_, vEXCLD_,vNECESS_;
   bool zeropref=true;
-  string idlog="id.log";
-  
+  string intfile="integrated.log";
+
   options_description infor( "Program information");
   infor.add_options()
     ("help,h", "print help message.")
@@ -40,9 +45,9 @@ int main(int argc, char* argv[])
   usg.add_options()
     ("phnfile,P",value<string>(), "phenotype categoroes spec file []")
     ("fipsfile,F",value<string>(), "FIPS spec file")
+    ("intfile,I",value<string>(&intfile), "Integrated file")
     ("fips,f",value<vector<string> >()->multitoken(), "FIPS spec in command line")
-    ("dxfile,D",value< string>(), "dx file []")
-    ("datadirectory,d",value< string>(), "directory for finding iput files [./]");
+    ("dxfile,D",value< string>(), "dx file []");
   
   options_description outputopt( "Output options");
   outputopt.add_options()
@@ -52,7 +57,6 @@ int main(int argc, char* argv[])
     ("truncate,T",value<vector<unsigned int> >()->multitoken(), "truncate at first occurrence []")
     ("exclude,X",value<vector<unsigned int> >()->multitoken(), "exclude any occurrence []")
     ("necess,N",value<vector<unsigned int> >()->multitoken(), "must occur []")
-    ("log,L",value<string>(&idlog), "patient id logs [id.log]")
     ("timer,t",value<bool>(), "show timer [true]");
   
   options_description desc( "\n\n\
@@ -122,8 +126,6 @@ int main(int argc, char* argv[])
     dxfile=vm["dxfile"].as<string>();
   if (vm.count("fips"))
     vFILES_=vm["fips"].as<vector<string> >();
-  if (vm.count("datadirectory"))
-    datadirectory=vm["datadirectory"].as<string>();
   if (vm.count("resultdirectory"))
     resultdirectory=vm["resultdirectory"].as<string>();
   if (vm.count("agemax"))
@@ -146,10 +148,6 @@ int main(int argc, char* argv[])
   for(unsigned int i=0;i<vNECESS_.size();++i)
     NECESS_.insert(vNECESS_[i]);
 
-  dxfile=datadirectory+"/"+dxfile;
-  fipsfile=datadirectory+"/"+fipsfile;
-  phnfile=datadirectory+"/"+phnfile;
-
   if(fipsfile!="")
     {
       string linef;
@@ -159,7 +157,15 @@ int main(int argc, char* argv[])
       IF.close();
     }
 
-  _phenotype_ PHN(phnfile);
+  if (!boost::filesystem::exists(dxfile))
+    MESSAGE("ERROR: DB FILE MISSING");
+  if (!boost::filesystem::exists(phnfile))
+    MESSAGE("ERROR: PHN FILE MISSING");
+
+  if (!boost::filesystem::exists(resultdirectory))
+    boost::filesystem::create_directory(resultdirectory);
+
+  _phenotype_ PHN(phnfile,resultdirectory+"/"+intfile);
   PHN.setup(TRNCT_,EXCLD_,NECESS_);
   PHN.set_pref(zeropref);
   
@@ -178,7 +184,9 @@ int main(int argc, char* argv[])
   while(getline(IN,subject))
     UTIL__::print_status(PHN<<subject);
   cout << endl;
-  
+
+
+    
   PHN.write_log(resultdirectory);
   IN.close();
 

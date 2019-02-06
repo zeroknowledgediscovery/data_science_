@@ -1,5 +1,5 @@
 #include "procx.h"
-
+#define INDIVIDUAL_FILES 0
 //static const char* STRCOMMA = ",";
 const char* STRPIPE = "|";
 const char* STRCOMMA=",";
@@ -7,23 +7,36 @@ const char* STRCOLON=":";
 const char* STRCARET="^";
 const string HEALTHY_="H";
 
+//------------------------------------                                          
+void UTIL__::_MESSAGE(string m,const char *caller)
+{
+
+  cout << m
+       << " in function "
+       << std::string(caller) << endl;
+  if(m.find("ERROR") != std::string::npos)
+    exit(0);
+
+};
+
+
 //---------------------------------
 unsigned int UTIL__::FileRead( istream & is, vector <char> & buff )
 {
-    is.read( &buff[0], buff.size() );
-    return is.gcount();
+  is.read( &buff[0], buff.size() );
+  return is.gcount();
 }
 //---------------------------------
 unsigned int UTIL__::CountLines( const vector <char> & buff, int sz )
 {
-    int newlines = 0;
-    const char * p = &buff[0];
-    for ( int i = 0; i < sz; i++ ) {
-    	if ( p[i] == '\n' ) {
-    		newlines++;
-    	}
+  int newlines = 0;
+  const char * p = &buff[0];
+  for ( int i = 0; i < sz; i++ ) {
+    if ( p[i] == '\n' ) {
+      newlines++;
     }
-    return newlines;
+  }
+  return newlines;
 }
 //---------------------------------
 int UTIL__::FileSizeLines(ifstream& IN)
@@ -196,12 +209,15 @@ _subject_::_subject_(string str,
   
   bool GO_=false;
   if((gender__=="") || (gender__==gender_))
-      if((age__==-1) || ((int)age_<=age__))
-	GO_=true;
+    if((age__==-1) || ((int)age_<=age__))
+      GO_=true;
 
   if(GO_)
     {
-      _id_=id_;;
+
+      cout << id_ << " " << str << endl;
+      
+      _id_=id_;
       _age0_=age_;
       _gender_=gender_;
       _yr0_=yr_;
@@ -252,7 +268,7 @@ _subject_::_subject_(string str,
 //---------------------------------
 //---------------------------------
 
-_phenotype_::_phenotype_(string filename)
+_phenotype_::_phenotype_(string filename,string singlefile)
 {
   _lines_proc_=0;
   _agemax_=-1;
@@ -277,6 +293,12 @@ _phenotype_::_phenotype_(string filename)
 
   _cat_sym_[HEALTHY_]=0;
   _cat_sym_["other"]=alphabet++;
+
+  intlog=singlefile;
+
+  if(!INDIVIDUAL_FILES)
+    Dout.open(intlog.c_str());
+  
 };
 //---------------------------------
 
@@ -351,9 +373,16 @@ bool _phenotype_::operator() (const vector<set<string> >& phn__,
 	{
 	  if(_NCSRY.empty())
 	    {
-	      LOG_[Tout].push_back(_phv_);
-	      if(id!="")
-		LOGid_[Tout].push_back(id);
+	      if(INDIVIDUAL_FILES)
+		{
+		  LOG_[Tout].push_back(_phv_);
+		  if(id!="")
+		    LOGid_[Tout].push_back(id);
+		}
+	      else
+		{
+		  Dout  << Tout << " " << id << " " << _phv_;
+		}
 	      return true;
 	    }
 	  return false;
@@ -365,10 +394,18 @@ bool _phenotype_::operator() (const vector<set<string> >& phn__,
   if(!_NCSRY.empty())
     return false;
 
-  LOG_[out].push_back(_phv_);
-  if(id!="")
-    LOGid_[out].push_back(id);
+  if(INDIVIDUAL_FILES)
+    {
+      LOG_[out].push_back(_phv_);
+      if(id!="")
+	LOGid_[out].push_back(id);
+    }
+  else
+    {
+      Dout  << out << " " << id << " " << _phv_;
+    }
 
+  
   return true;
 };
 
@@ -455,7 +492,7 @@ void _phenotype_::set_pref(bool bb)
 {
   _FIRST_NON_TRIVIAL_SYM_=bb;
 }
-  //---------------------------------
+//---------------------------------
 void _phenotype_::set_agemax(int age__)
 {
   _agemax_=age__;
@@ -466,7 +503,7 @@ void _phenotype_::set_filelines(int LN__)
   _FSZ_=LN__;
 };
 //---------------------------------
-void _phenotype_::write_log(string directory,string ofile)
+void _phenotype_::write_log(string directory)
 {
   int count=0;
   cout << "writing files.." << endl;
@@ -486,13 +523,13 @@ void _phenotype_::write_log(string directory,string ofile)
     }
   cout << endl;
 
-  ofstream OUT_(ofile.c_str());
-    for(map<string,vector<string> >::iterator itr
-	  =LOGid_.begin();
+  ofstream OUT_((directory+"/"+"id.log").c_str());
+  for(map<string,vector<string> >::iterator itr
+	=LOGid_.begin();
       itr!=LOGid_.end();
       ++itr)
-      OUT_<< itr->first << " : " << itr->second;
-    OUT_.close();
+    OUT_<< itr->first << " : " << itr->second;
+  OUT_.close();
 };
 //---------------------------------
 //---------------------------------
