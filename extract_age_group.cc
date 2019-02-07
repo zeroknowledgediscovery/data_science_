@@ -141,7 +141,7 @@ int main(int argc, char* argv[])
 	      if(count==1)
 		{
 		  int age=atoi(tok.c_str());
-		  if ((age<=AGEMAX) && (age>=AGEMIN))
+		  if ((age<=AGEMAX) && (age>=AGEMIN) && (line_.back()!=HDRSEP))
 			out << line_ << endl;
 		  break;
 		}
